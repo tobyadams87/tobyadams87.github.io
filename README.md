@@ -1,6 +1,6 @@
 # Toby Adams: homepage
 
-Source for my personal homepage, served at https://toby.is-a.dev (also reachable at https://tobyadams87.github.io).
+Source for my personal homepage, served at https://toby.is-a.dev (also reachable at https://tobyadams87.github.io, which redirects to the same site).
 
 ## Domain
 
@@ -11,5 +11,5 @@ The `CNAME` file keeps GitHub Pages attached to the domain, so please don't dele
 ## Files
 
 - `index.html`: the page itself
-- - `CNAME`: the custom domain
-  - 
+- `CNAME`: the custom domain
+- `README.md`: this file
