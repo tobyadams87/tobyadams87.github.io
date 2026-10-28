@@ -194,6 +194,27 @@
   .price small { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
   .rates .note { color: var(--muted); margin-top: 1.25rem; }
 
+  .enquiry { padding: 1.4rem; display: grid; gap: 1rem; }
+  .enquiry .row { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 560px) { .enquiry .row { grid-template-columns: 1fr; } }
+  .enquiry label { display: grid; gap: 0.4rem; font: 500 0.75rem/1.2 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .enquiry small { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .enquiry input, .enquiry select, .enquiry textarea {
+    font: 400 1rem/1.4 var(--serif); color: var(--ink); background: var(--paper);
+    border: 1px solid var(--frame); border-radius: 0; padding: 0.6rem 0.7rem; width: 100%;
+    text-transform: none; letter-spacing: 0;
+  }
+  .enquiry input, .enquiry select { height: 2.75rem; }
+  .enquiry textarea { resize: vertical; min-height: 7rem; }
+  .enquiry input:focus, .enquiry select:focus, .enquiry textarea:focus { outline: 2px solid var(--link); outline-offset: 1px; }
+  .enquiry .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .enquiry .send { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+  .enquiry button { font: 500 0.85rem/1 var(--mono); cursor: pointer; }
+  .enquiry button[disabled] { opacity: 0.6; cursor: wait; }
+  .enquiry .status { margin: 0; font-size: 1rem; }
+  .enquiry .status.ok { color: var(--ink); font-weight: 600; }
+  .enquiry .status.err { color: #b3261e; }
+  @media (prefers-color-scheme: dark) { .enquiry .status.err { color: #ff8a80; } }
   footer {
     display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;
     padding: 1.75rem 0 3rem; border-top: 1px solid var(--rule);
@@ -224,7 +245,7 @@
         <h1>Computer Science tutoring</h1>
         <p class="lead">I'm Toby, Head of Computing at a secondary school, with 19 years in education. I tutor GCSE and A Level Computer Science, online or in person around Dartford and Gravesend.</p>
         <div class="hero-links">
-          <a class="btn primary" href="https://www.facebook.com/tobya">Message me on Facebook ↗</a>
+          <a class="btn primary" href="#contact">Send me a message ↓</a>
           <a class="btn" href="#subjects">What I cover ↓</a>
         </div>
       </div>
@@ -292,12 +313,42 @@
     </div>
   </section>
 
-  <section id="contact" class="contact">
-    <p class="kicker">Contact</p>
-    <h2>Get in touch</h2>
-    <p>The easiest way to reach me is a message on Facebook. Tell me the year group, the exam board if you know it, and what you'd like help with, and I'll get back to you.</p>
-    <div class="hero-links">
-      <a class="btn primary" href="https://www.facebook.com/tobya">Message me on Facebook ↗</a>
+  <section id="contact">
+    <div class="rates">
+      <div>
+        <p class="kicker">Contact</p>
+        <h2>Get in touch</h2>
+        <p>Send me a message here and I'll get back to you by email. It helps to know the year group, the exam board if you know it, and what you'd like help with.</p>
+      </div>
+      <div class="window">
+        <div class="window-bar" aria-hidden="true"><i></i><span>New enquiry</span><i></i></div>
+        <form class="enquiry" id="enquiry" action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="b338b96d-78c6-466d-a366-f801dcb9c7d3">
+          <input type="hidden" name="subject" value="Tutoring enquiry from toby.is-a.dev">
+          <input type="hidden" name="from_name" value="toby.is-a.dev tutoring">
+          <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div class="row">
+            <label>Your name<input type="text" name="name" autocomplete="name" required></label>
+            <label>Email<input type="email" name="email" autocomplete="email" required></label>
+          </div>
+          <div class="row">
+            <label>Level
+              <select name="level" required>
+                <option value="" disabled selected>Choose one</option>
+                <option>GCSE</option>
+                <option>A Level</option>
+                <option>Not sure</option>
+              </select>
+            </label>
+            <label><span>Exam board <small>(optional)</small></span><input type="text" name="exam_board"></label>
+          </div>
+          <label>Message<textarea name="message" rows="5" required placeholder="Year group, what you'd like help with, online or in person"></textarea></label>
+          <div class="send">
+            <button class="btn primary" type="submit">Send message</button>
+            <p class="status" id="status" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -307,5 +358,36 @@
   </footer>
 
 </div>
+<script>
+(function () {
+  var form = document.getElementById('enquiry');
+  var status = document.getElementById('status');
+  var button = form.querySelector('button');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+    button.disabled = true;
+    status.className = 'status';
+    status.textContent = 'Sending…';
+    fetch(form.action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(Object.fromEntries(new FormData(form)))
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.success) throw new Error(data.message || 'failed');
+        form.reset();
+        status.className = 'status ok';
+        status.textContent = "Thanks, that's sent. I'll reply by email.";
+      })
+      .catch(function () {
+        status.className = 'status err';
+        status.textContent = "Sorry, that didn't send. Please try again in a minute.";
+      })
+      .finally(function () { button.disabled = false; });
+  });
+})();
+</script>
 </body>
 </html>
