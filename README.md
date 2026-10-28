@@ -10,7 +10,6 @@ The `CNAME` file keeps GitHub Pages attached to the domain, so please don't dele
 
 ## Files
 
-- `index.html`: the homepage
-- `tutoring/index.html`: the tutoring page, at /tutoring/
+- `index.html`: the page itself
 - `CNAME`: the custom domain
 - `README.md`: this file
